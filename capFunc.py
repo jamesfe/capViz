@@ -45,7 +45,7 @@ def dispList(tgtDir, d, badFile):
 			count+=1
 			if(count%cutLine==0):
 				sys.stdout.write("<br />\n")
-			sys.stdout.write("<img id=\""+k+"\" onClick=\"deltaBorder(this)\" src=\"./"+k+"\" height=\""+dimension+"\" width=\""+dimension+"\">")
+			sys.stdout.write("<img id=\""+k+"\" onClick=\"deltaBorder(this)\" src=\""+tgtDir+k+"\" height=\""+dimension+"\" width=\""+dimension+"\">")
 
 def showRemoveForm():
 	""" form that updates a list of bad caps and sends it to be added to the 

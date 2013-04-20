@@ -25,7 +25,7 @@ img {
 """
 form = cgi.FieldStorage()
 if('blist' not in form):
-	capFunc.dispList(".", 30, badIDFile)
+	capFunc.dispList("./jpg/", 30, badIDFile)
 	capFunc.showRemoveForm()
 else:
 	badIDs = set()
