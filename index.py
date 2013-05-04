@@ -23,9 +23,11 @@ img {
 <script src="./jsFunc.js"></script>
 </head>
 """
+capSize = 10
+jpgDir = "./jpg/"
 form = cgi.FieldStorage()
 if('blist' not in form):
-	capFunc.dispList("./jpg/", 30, badIDFile)
+	capFunc.dispList(jpgDir, capSize, badIDFile)
 	capFunc.showRemoveForm()
 else:
 	badIDs = set()
@@ -36,6 +38,6 @@ else:
 	for k in formBadList:
 		badIDs.add(k)
 	pickle.dump(badIDs, file(badIDFile, 'wb'))
-	capFunc.dispList('.', 30, badIDFile)
+	capFunc.dispList(jpgDir, capSize, badIDFile)
 	capFunc.showRemoveForm()
 print "</html>"
