@@ -1,9 +1,10 @@
 #!/usr/bin/python
-
-from os import listdir
 from os.path import isfile
-import cgitb, sys, cgi, pickle, json
-from math import sqrt
+import cgitb
+import cgi
+import pickle
+import json
+
 cgitb.enable()
 import capFunc
 
@@ -16,8 +17,8 @@ print """
 <head>
 <style>
 img {
-	margin: 0px;
-	padding: 0px;
+    margin: 0px;
+    padding: 0px;
 }
 </style>
 <script src="./jsFunc.js"></script>
@@ -26,18 +27,18 @@ img {
 capSize = 10
 jpgDir = "./jpg/"
 form = cgi.FieldStorage()
-if('blist' not in form):
-	capFunc.dispList(jpgDir, capSize, badIDFile)
-	capFunc.showRemoveForm()
+if 'blist' not in form:
+    capFunc.dispList(jpgDir, capSize, badIDFile)
+    capFunc.showRemoveForm()
 else:
-	badIDs = set()
-	if(isfile(badIDFile)):
-		badIDs = pickle.load(file(badIDFile, 'rb'))
-	#print form.getvalue('blist')
-	formBadList = json.loads(form.getvalue('blist'))
-	for k in formBadList:
-		badIDs.add(k)
-	pickle.dump(badIDs, file(badIDFile, 'wb'))
-	capFunc.dispList(jpgDir, capSize, badIDFile)
-	capFunc.showRemoveForm()
+    badIDs = set()
+    if isfile(badIDFile):
+        badIDs = pickle.load(file(badIDFile, 'rb'))
+    # print form.getvalue('blist')
+    formBadList = json.loads(form.getvalue('blist'))
+    for k in formBadList:
+        badIDs.add(k)
+    pickle.dump(badIDs, file(badIDFile, 'wb'))
+    capFunc.dispList(jpgDir, capSize, badIDFile)
+    capFunc.showRemoveForm()
 print "</html>"
