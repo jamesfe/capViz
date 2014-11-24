@@ -7,8 +7,8 @@ import colorsys
 from os.path import isfile, join
 import cPickle
 
-import Image
-import ImageStat
+# import Image
+# import ImageStat
 
 
 class capDat:
@@ -24,10 +24,10 @@ class capDat:
     def __str__(self):
         """ if you want to print yourself."""
         arr = [self.fname, self.r, self.g, self.b, self.h, self.s, self.l]
-        return (str(arr))
+        return str(arr)
 
     def getArr(self):
-        return ([self.r, self.g, self.b, self.h, self.s, self.l])
+        return [self.r, self.g, self.b, self.h, self.s, self.l]
 
 
 def dispList(tgtDir, d, badFile):
@@ -38,7 +38,7 @@ def dispList(tgtDir, d, badFile):
         badFile - pickled file listing filenames of bad caps (set)
         """
     badList = set()
-    if (isfile(badFile)):
+    if isfile(badFile):
         badList = cPickle.load(file(badFile, 'rb'))
     cDirList = listdir(tgtDir)
     cutLine = round(sqrt(len(cDirList)), 0)
@@ -47,7 +47,7 @@ def dispList(tgtDir, d, badFile):
     for k in cDirList:
         if (k[-4:].lower() == ".jpg") & (k not in badList):
             count += 1
-            if (count % cutLine == 0):
+            if count % cutLine == 0:
                 sys.stdout.write("<br />\n")
             sys.stdout.write(
                 "<img id=\"" + k + "\" onClick=\"deltaBorder(this)\" src=\"" +
@@ -66,46 +66,45 @@ def showRemoveForm():
 </form>"""
 
 
-def indexsort(badPFile, pickleFile, indices):
-    if (len(indices) != 2):
+def indexsort(badPFile, pickle_file, indices):
+    if len(indices) != 2:
         print "Fail"
         return (-1)
     badFiles = cPickle.load(file(badPFile, 'rb'))
-    fileDat = cPickle.load(file(pickleFile, 'rb'))
-    if (len(fileDat[0].getArr()) <= max(indices)):
+    fileDat = cPickle.load(file(pickle_file, 'rb'))
+    if len(fileDat[0].getArr()) <= max(indices):
         print "Sort index too large.  Fail."
         return (-1)
     targetData = []
     for i in fileDat:
-        if (i.fname not in badFiles):
-            targetData.append([i.fname, i.getArr()[indices[0]], \
+        if i.fname not in badFiles:
+            targetData.append([i.fname, i.getArr()[indices[0]],
                                i.getArr()[indices[1]]])
     targetData.sort(key=lambda x: x[1])
     targetData.sort(key=lambda x: x[2])
-    # print targetData[0:5]
-    # print indices
-    return (targetData)
+
+    return targetData
 
 
 def rowsort(badPFile, pickleFile, indices):
-    if (len(indices) != 2):
+    if len(indices) != 2:
         print "Fail"
-        return (-1)
+        return -1
     badFiles = cPickle.load(file(badPFile, 'rb'))
     fileDat = cPickle.load(file(pickleFile, 'rb'))
-    if (len(fileDat[0].getArr()) <= max(indices)):
+    if len(fileDat[0].getArr()) <= max(indices):
         print "Sort index too large.  Fail."
-        return (-1)
-    targetData = []
+        return -1
+    targetData = list()
     for i in fileDat:
         if (i.fname not in badFiles):
-            targetData.append([i.fname, i.getArr()[indices[0]], \
+            targetData.append([i.fname, i.getArr()[indices[0]],
                                i.getArr()[indices[1]]])
     targetData.sort(key=lambda x: x[1])
     cutLine = int(round(sqrt(len(targetData)), 0))
     for i in range(0, cutLine):
         targetData[i:len(targetData):cutLine] = sorted(
-            targetData[i:len(targetData):cutLine], \
+            targetData[i:len(targetData):cutLine],
             key=lambda x: x[2])
     """
     ranges = [[cutLine*(i-1), cutLine*i] for i in range(1, cutLine+1)]
@@ -124,14 +123,14 @@ def rowsort(badPFile, pickleFile, indices):
             targetData[i] = tmp[r]
             r+=1
     """
-    return (targetData)
+    return targetData
 
 
-def showCapSquare(dList, d):
+def showCapSquare(d_list, d):
     d = str(d)
-    cutline = round(sqrt(len(dList)))
+    cutline = round(sqrt(len(d_list)))
     count = 0
-    for k in dList:
+    for k in d_list:
         count += 1
         sys.stdout.write("<img src=\"./" + k[
             0] + "\" height=\"" + d + "\" width=\"" + d + "\">")
@@ -139,25 +138,31 @@ def showCapSquare(dList, d):
             print "<br />\n"
 
 
-def reScale01(num, mxNum):
-    return (1.0 * num) / mxNum
+def reScale01(num, mx_num):
+    """
+    rescale to a 0-1 scale
+    :param num:     current value to scale
+    :param mx_num:  max value
+    :return:
+    """
+    return (1.0 * num) / mx_num
 
 
-def repickle(tgtDir, pickleFile):
+def repickle(tgt_dir, pickle_file):
     """ creates a new pickle file with the hsl and rgb specs for all the
         caps in the target directory (including bad ones, for glitches.)
     """
     print "repickling<br>"
-    fileList = [i for i in listdir(tgtDir) if
-                ((i[-3:].lower() == 'jpg') & (len(i) > 3))]
-    isList = [(i, ImageStat.Stat(Image.open(join(tgtDir, i)))) for i in
-              fileList]
-    capList = []
-    for statset in isList:
+    file_list = [i for i in listdir(tgt_dir) if
+                 ((i[-3:].lower() == 'jpg') & (len(i) > 3))]
+    is_list = [(i, ImageStat.Stat(Image.open(join(tgt_dir, i)))) for i in
+               file_list]
+    cap_list = list()
+    for statset in is_list:
         rgb = [reScale01(i, 255) for i in statset[1].mean]
         hsl = list(colorsys.rgb_to_hsv(rgb[0], rgb[1], rgb[2]))
-        capList.append(capDat(statset[0], rgb[0], rgb[1], rgb[2], \
-                              hsl[0], hsl[1], hsl[2]))
-        print capList[len(capList) - 1], "<br>"
-    cPickle.dump(capList, file(pickleFile, 'wb'))
-    return pickleFile
+        cap_list.append(capDat(statset[0], rgb[0], rgb[1], rgb[2],
+                               hsl[0], hsl[1], hsl[2]))
+        print cap_list[len(cap_list) - 1], "<br>"
+    cPickle.dump(cap_list, file(pickle_file, 'wb'))
+    return pickle_file

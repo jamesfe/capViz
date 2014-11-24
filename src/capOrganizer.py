@@ -10,8 +10,8 @@ print "Content-Type: text/html\n\r\n"
 
 
 def getHeader():
-    retStr = "<html><head><title>cap organizer</title></head>"
-    return (retStr)
+    ret_str = "<html><head><title>cap organizer</title></head>"
+    return ret_str
 
 
 def getFooter():
