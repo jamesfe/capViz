@@ -7,8 +7,7 @@ import colorsys
 from os.path import isfile, join
 import cPickle
 
-# import Image
-# import ImageStat
+from PIL import Image, ImageStat
 
 
 class capDat:
