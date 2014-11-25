@@ -69,13 +69,13 @@ def showRemoveForm():
 def indexsort(badPFile, pickle_file, indices):
     if len(indices) != 2:
         print "Fail"
-        return (-1)
+        return -1
     badFiles = cPickle.load(file(badPFile, 'rb'))
     fileDat = cPickle.load(file(pickle_file, 'rb'))
     if len(fileDat[0].getArr()) <= max(indices):
         print "Sort index too large.  Fail."
-        return (-1)
-    targetData = []
+        return -1
+    targetData = list()
     for i in fileDat:
         if i.fname not in badFiles:
             targetData.append([i.fname, i.getArr()[indices[0]],
