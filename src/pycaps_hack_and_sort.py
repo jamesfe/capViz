@@ -5,21 +5,20 @@ A not-so horrible set of routines to convert a form into an image.
 from PIL import Image, ImageDraw, ImageStat
 import colorsys
 import time
-import re
+import addict
 
-TESTCONF = """
-in_caps_rows=30
-in_caps_cols=30
-out_caps_rows=30
-out_caps_cols=30
-in_cap_file=./new_grid_110316_daylight.bmp
-incap_pixwidth=80
-first_sort=hue
-second_sort=saturation
-number_order=1
-use_temp_name=1
-draw_style=pix
-"""
+
+CONFIGURATION = {'draw_style': 'pix',
+                 'first_sort': 'hue',
+                 'in_cap_file': './new_grid_110316_daylight.bmp',
+                 'in_caps_cols': 30,
+                 'in_caps_rows': 30,
+                 'input_cap_pixel_width': 80,
+                 'number_order': 1,
+                 'out_caps_cols': 30,
+                 'out_caps_rows': 30,
+                 'second_sort': 'saturation',
+                 'use_temp_name': True}
 
 
 class ImageGenerator:
@@ -28,19 +27,9 @@ class ImageGenerator:
     on every cut in the file, and then rearrange it into something the user
     has specified.
     """
+
     def __init__(self, conf_file):
         self.conf = dict()
-        ## cfile = file(conf_file, 'r')
-        cfile = TESTCONF.split("\n")
-        for keyword in cfile:
-            ## A hackish configuration file
-            dv = keyword.strip().split("=")
-            if len(dv) == 2:
-                if re.match("^[0-9]*$", dv[1].strip()) is not None:
-                    indat = int(dv[1].strip())
-                else:
-                    indat = dv[1].strip()
-                self.conf[dv[0].strip()] = indat
         self.inImage = Image.open(self.conf['in_cap_file'])
         self.sorts = dict(
             {"red": 0, "green": 1, "blue": 2, "hue": 3, "saturation": 4,
@@ -48,6 +37,8 @@ class ImageGenerator:
         self.imageDatList = None
         self.sortedDatList = None
         self.outname = None
+        self.height = self.conf.in_caps_rows
+        self.width = self.conf.in_caps_cols
 
     def gather_data(self):
         """
@@ -57,15 +48,11 @@ class ImageGenerator:
         code.
         :return:
         """
-        mult = self.conf['incap_pixwidth']
+        pixel_multiple = self.conf.input_cap_pixel_width
         self.imageDatList = list()
-        for col in range(0, self.inImage.size[0] / mult):
-            for row in range(0, self.inImage.size[1] / mult):
-                xleft = mult * col
-                xright = mult * (col + 1)
-                ytop = mult * row
-                ybottom = mult * (row + 1)
-                box = (xleft, ytop, xright, ybottom)
+        for col in range(0, self.width / pixel_multiple):
+            for row in range(0, self.height / pixel_multiple):
+                box = buildbox(row=row, col=col, delta=pixel_multiple)
                 subregion = self.inImage.crop(box)
                 rgb_means = ImageStat.Stat(subregion).mean
                 hsl_means = colorsys.rgb_to_hls(rgb_means[0] / 255,
@@ -82,8 +69,8 @@ class ImageGenerator:
         """
         self.sortedDatList = sorted(self.imageDatList,
                                     key=lambda thislist: thislist[
-                                        self.sorts[self.conf['first_sort']]])
-        del self.imageDatList
+                                        self.sorts[self.conf.first_sort]])
+        del self.imageDatList  # todo: sort properly
         self.imageDatList = self.sortedDatList
 
     def second_sort(self):
@@ -101,8 +88,7 @@ class ImageGenerator:
         for r in ranges:
             self.imageDatList[r[0]:r[1]] = sorted(self.imageDatList[r[0]:r[1]],
                                                   key=lambda thislist: thislist[
-                                                      self.sorts[self.conf[
-                                                          'second_sort']]])
+                                                      self.sorts[self.conf.second_sort]])
 
     def save_image(self):
         """
@@ -121,18 +107,14 @@ class ImageGenerator:
         del count
 
         out_img = Image.new("RGB", (
-            self.conf['out_caps_cols'] * self.conf['incap_pixwidth'],
-            self.conf['out_caps_rows'] * self.conf['incap_pixwidth']))
+            self.conf['out_caps_cols'] * self.conf.input_cap_pixel_width,
+            self.conf['out_caps_rows'] * self.conf.input_cap_pixel_width))
         draw = ImageDraw.Draw(out_img)
-        mult = self.conf['incap_pixwidth']
+        mult = self.conf.input_cap_pixel_width
         count = 0
         for row in range(0, self.conf['out_caps_rows']):
             for col in range(0, self.conf['out_caps_cols']):
-                xleft = mult * col
-                xright = mult * (col + 1)
-                ytop = mult * row
-                ybottom = mult * (row + 1)
-                box = (xleft, ytop, xright, ybottom)
+                box = buildbox(row=row, col=col, delta=mult)
                 if self.conf['draw_style'] == 'pix':
                     draw.rectangle(box, fill=(int(self.imageDatList[count][0]),
                                               int(self.imageDatList[count][1]),
@@ -142,11 +124,16 @@ class ImageGenerator:
                 count += 1
         ctime = str(time.time())[:-3]
         self.outname = ctime + "_hsvrgb_sort_" + self.conf['first_sort'] + "_" + \
-                       self.conf['second_sort'] + ".jpg"
+                       self.conf.second_sort + ".jpg"
         if self.conf['use_temp_name'] == 1:
             self.outname = "temp.jpg"
         out_img.save(self.outname)
 
+def buildbox(row=0, col=0, delta=0):
+    """
+    Build a box - return (xleft, ytop, xright, ybottom)
+    """
+    return row * delta, col * delta, col * (delta+1), row * (delta+1)
 
 if __name__ == "__main__":
     img_gen = ImageGenerator("img_read.conf")
