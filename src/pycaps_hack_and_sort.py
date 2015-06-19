@@ -1,3 +1,7 @@
+"""
+A not-so horrible set of routines to convert a form into an image.
+"""
+
 from PIL import Image, ImageDraw, ImageStat
 import colorsys
 import time

@@ -1,4 +1,9 @@
 #!/usr/bin/python
+
+"""
+This file needs to die and be turned into a Flask template.
+"""
+
 from os.path import isfile
 import cgitb
 import cgi

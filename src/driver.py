@@ -1,3 +1,7 @@
+"""
+Here's a file that does...something.  Unknown.
+"""
+
 import capFunc
 
 

@@ -1,4 +1,9 @@
 #!/usr/bin/python
+
+"""
+Some really old crappy code that allows the server to respond with a pre-formed HTML page.
+"""
+
 import cgitb
 import cgi
 import types
